@@ -24,7 +24,7 @@ http://arduino.cc/en/Reference/HomePage
 
 # Extends: https://github.com/platformio/platform-espressif32/blob/develop/builder/main.py
 
-from os.path import isdir, isfile, join
+from os.path import abspath, isdir, isfile, join
 
 from SCons.Script import DefaultEnvironment
 
@@ -56,6 +56,7 @@ env.Prepend(
     CPPPATH=[
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "config"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "bluedroid"),
+        join(FRAMEWORK_DIR, "tools", "sdk", "include", "bluedroid", "api"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "app_trace"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "app_update"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "bootloader_support"),
@@ -63,6 +64,8 @@ env.Prepend(
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "driver"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "esp32"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "esp_adc_cal"),
+        join(FRAMEWORK_DIR, "tools", "sdk", "include", "esp_http_client"),
+        join(FRAMEWORK_DIR, "tools", "sdk", "include", "esp-tls"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "ethernet"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "fatfs"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "freertos"),
@@ -77,6 +80,7 @@ env.Prepend(
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "openssl"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "spi_flash"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "sdmmc"),
+        join(FRAMEWORK_DIR, "tools", "sdk", "include", "smartconfig_ack"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "spiffs"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "tcpip_adapter"),
         join(FRAMEWORK_DIR, "tools", "sdk", "include", "ulp"),
@@ -99,7 +103,7 @@ env.Prepend(
         join(FRAMEWORK_DIR, "tools", "sdk", "ld")
     ],
     LIBS=[
-        "gcc", "openssl", "btdm_app", "fatfs", "wps", "coexist", "wear_levelling", "hal", "newlib", "driver", "bootloader_support", "pp", "mesh", "smartconfig", "jsmn", "wpa", "ethernet", "phy", "app_trace", "console", "ulp", "wpa_supplicant", "freertos", "bt", "micro-ecc", "cxx", "xtensa-debug-module", "mdns", "vfs", "soc", "core", "sdmmc", "coap", "tcpip_adapter", "c_nano", "rtc", "spi_flash", "wpa2", "esp32", "app_update", "nghttp", "spiffs", "espnow", "nvs_flash", "esp_adc_cal", "log", "expat", "m", "c", "heap", "mbedtls", "lwip", "net80211", "pthread", "json", "stdc++"
+        "gcc", "openssl", "btdm_app", "fatfs", "wps", "coexist", "wear_levelling", "esp_http_client", "hal", "newlib", "driver", "bootloader_support", "pp", "mesh", "smartconfig", "jsmn", "wpa", "ethernet", "phy", "app_trace", "console", "ulp", "wpa_supplicant", "freertos", "bt", "micro-ecc", "cxx", "xtensa-debug-module", "mdns", "vfs", "soc", "core", "sdmmc", "coap", "tcpip_adapter", "c_nano", "esp-tls", "rtc", "spi_flash", "wpa2", "esp32", "app_update", "nghttp", "spiffs", "espnow", "nvs_flash", "esp_adc_cal", "log", "smartconfig_ack", "expat", "m", "c", "heap", "mbedtls", "lwip", "net80211", "pthread", "json", "stdc++"
     ]
 )
 
@@ -161,8 +165,9 @@ env.Prepend(LIBS=libs)
 fwpartitions_dir = join(FRAMEWORK_DIR, "tools", "partitions")
 partitions_csv = env.BoardConfig().get("build.partitions", "default.csv")
 env.Replace(
-    PARTITIONS_TABLE_CSV=join(fwpartitions_dir, partitions_csv) if isfile(
-        join(fwpartitions_dir, partitions_csv)) else partitions_csv)
+    PARTITIONS_TABLE_CSV=abspath(
+        join(fwpartitions_dir, partitions_csv) if isfile(
+            join(fwpartitions_dir, partitions_csv)) else partitions_csv))
 
 partition_table = env.Command(
     join("$BUILD_DIR", "partitions.bin"),
